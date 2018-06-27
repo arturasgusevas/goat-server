@@ -2,25 +2,30 @@
 
 //mongoose file must be loaded before all other files in order to provide
 // models to other modules
-const mongoose = require('./mongoose');
+const mongoose = require('mongoose');
 const	passport = require('passport');
 const	express = require('express');
-const	jwt = require('jsonwebtoken');
-const	expressJwt = require('express-jwt');
+// const	jwt = require('jsonwebtoken');
+// const	expressJwt = require('express-jwt');
 const	router = express.Router();
 const	cors = require('cors');
 const	bodyParser = require('body-parser');
 
-mongoose();
 
-let User = require('mongoose').model('User');
-let passportConfig = require('./passport');
+// mongoose();
+const userController = require('./controllers/user');
+
+// let User = require('mongoose').model('User');
+let passportConfig = require('./config/passport');
 
 //setup configuration for facebook login
 passportConfig();
 
 let app = express();
 
+mongoose.connect('mongodb://admin:test123@ds227858.mlab.com:27858/test-db1', {
+  	useMongoClient: true
+});
 // enable cors
 let corsOption = {
   origin: true,
@@ -41,24 +46,24 @@ router.route('/health-check').get(function(req, res) {
   res.send('Hello World');
 });
 
-let createToken = function(auth) {
-  return jwt.sign({
-    id: auth.id
-  }, 'my-secret',
-  {
-    expiresIn: 60 * 120
-  });
-};
+// let createToken = function(auth) {
+//   return jwt.sign({
+//     id: auth.id
+//   }, 'my-secret',
+//   {
+//     expiresIn: 60 * 120
+//   });
+// };
 
-let generateToken = function (req, res, next) {
-  req.token = createToken(req.auth);
-  next();
-};
+// let generateToken = function (req, res, next) {
+//   req.token = createToken(req.auth);
+//   next();
+// };
 
-let sendToken = function (req, res) {
-  res.setHeader('x-auth-token', req.token);
-  res.status(200).send(req.auth);
-};
+// let sendToken = function (req, res) {
+//   res.setHeader('x-auth-token', req.token);
+//   res.status(200).send(req.auth);
+// };
 
 router.route('/auth/facebook')
 	.get(function(req, res) {
@@ -75,42 +80,42 @@ router.route('/auth/facebook')
     };
 
     next();
-  }, generateToken, sendToken);
+  }, userController.generateToken, userController.sendToken);
 
 //token handling middleware
-let authenticate = expressJwt({
-  secret: 'my-secret',
-  requestProperty: 'auth',
-  getToken: function(req) {
-    if (req.headers['x-auth-token']) {
-      return req.headers['x-auth-token'];
-    }
-    return null;
-  }
-});
+// let authenticate = expressJwt({
+//   secret: 'my-secret',
+//   requestProperty: 'auth',
+//   getToken: function(req) {
+//     if (req.headers['x-auth-token']) {
+//       return req.headers['x-auth-token'];
+//     }
+//     return null;
+//   }
+// });
 
-let getCurrentUser = function(req, res, next) {
-  User.findById(req.auth.id, function(err, user) {
-    if (err) {
-      next(err);
-    } else {
-      req.user = user;
-      next();
-    }
-  });
-};
+// let getCurrentUser = function(req, res, next) {
+//   User.findById(req.auth.id, function(err, user) {
+//     if (err) {
+//       next(err);
+//     } else {
+//       req.user = user;
+//       next();
+//     }
+//   });
+// };
 
-let getOne = function (req, res) {
-  let user = req.user.toObject();
+// let getOne = function (req, res) {
+//   let user = req.user.toObject();
 
-  delete user['facebookProvider'];
-  delete user['__v'];
+//   delete user['facebookProvider'];
+//   delete user['__v'];
 
-  res.json(user);
-};
+//   res.json(user);
+// };
 
 router.route('/auth/me')
-  .get(authenticate, getCurrentUser, getOne);
+  .get(userController.authenticate, userController.getCurrentUser, userController.getOne);
 
 app.use('/api/v1', router);
 
