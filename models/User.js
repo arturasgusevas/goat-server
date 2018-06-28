@@ -27,13 +27,11 @@ userSchema.set('toJSON', { getters: true, virtuals: true });
 
 userSchema.statics.upsertFbUser = function(accessToken, refreshToken, profile, cb) {
   let that = this;
-      console.log(profile)
   return this.findOne({
     'facebookProvider.id': profile.id
   }, function(err, user) {
     // no user was found, lets create a new one
     if (!user) {
-      console.log('new user')
       let newUser = new that({
         fullName: profile.displayName,
         photoURL: profile.photos[0].value,

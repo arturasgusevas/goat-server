@@ -2,6 +2,7 @@
 
 const passport = require('passport');
 const FacebookTokenStrategy = require('passport-facebook-token');
+const LocalTokenStrategy = require('passport-local')
 const User = require('mongoose').model('User');
 
 exports.config = function() {
@@ -14,5 +15,6 @@ exports.config = function() {
         return done(err, user);
       });
     }));
+  passport.use(new LocalTokenStrategy({}))
 
 };

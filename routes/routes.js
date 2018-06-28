@@ -11,9 +11,6 @@ router.route('/health-check').get(function(req, res) {
 });
 
 router.route('/auth/facebook')
-	.get(function(req, res) {
-		res.json({message: 'get'})
-	})
   .post(passport.authenticate('facebook-token', {session: false}), function(req, res, next) {
     if (!req.user) {
       return res.send(401, 'User Not Authenticated');
@@ -27,6 +24,10 @@ router.route('/auth/facebook')
     next();
   }, userController.generateToken, userController.sendToken);
 
+router.route('/auth/email')
+  .post(function(req, res, next) {
+    res.json('ok')
+  })
 
 router.route('/auth/me')
   .get(
