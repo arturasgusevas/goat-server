@@ -1,8 +1,12 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  firstName: { type: String },
-  lastName: { type: String },
+  fullName: {
+    type: String
+  },
+  photoURL: {
+    type: String
+  },
   email: {
     type: String,
     required: true,
@@ -23,13 +27,16 @@ userSchema.set('toJSON', { getters: true, virtuals: true });
 
 userSchema.statics.upsertFbUser = function(accessToken, refreshToken, profile, cb) {
   let that = this;
+      console.log(profile)
   return this.findOne({
     'facebookProvider.id': profile.id
   }, function(err, user) {
     // no user was found, lets create a new one
     if (!user) {
+      console.log('new user')
       let newUser = new that({
         fullName: profile.displayName,
+        photoURL: profile.photos[0].value,
         email: profile.emails[0].value,
         facebookProvider: {
           id: profile.id,

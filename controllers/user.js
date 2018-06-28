@@ -1,9 +1,7 @@
-// const mongoose = require('../mongoose');
-const	jwt = require('jsonwebtoken');
-const	expressJwt = require('express-jwt');
 
-// mongoose();
-// let User = require('mongoose').model('User');
+const jwt = require('jsonwebtoken');
+const expressJwt = require('express-jwt');
+
 const User = require('../models/User');
 
 let createToken = function(auth) {
