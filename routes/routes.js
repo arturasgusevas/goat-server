@@ -5,9 +5,9 @@ const userController = require('../controllers/user');
 let passportConfig = require('../config/passport');
 passportConfig.config();
 
-router.route('/health-check').get(function(req, res) {
+router.route('/check').get(function(req, res) {
   res.status(200);
-  res.send('Hello World');
+  res.send('API is working');
 });
 
 router.route('/auth/facebook')
