@@ -24,10 +24,11 @@ router.route('/auth/facebook')
     next();
   }, userController.generateToken, userController.sendToken);
 
-router.route('/auth/email')
-  .post(function(req, res, next) {
-    res.json('ok')
-  })
+router.route('/auth/emailSignup')
+  .post(function(req, res, next){
+    console.log(req.body);
+    next();
+  },passport.authenticate('local-signup'))
 
 router.route('/auth/me')
   .get(

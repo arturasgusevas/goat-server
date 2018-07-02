@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
   fullName: {
@@ -13,6 +14,9 @@ const userSchema = new mongoose.Schema({
     trim: true,
     unique: true,
     match: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/
+  },
+  password: {
+    type: String
   },
   facebookProvider: {
     type: {
@@ -53,6 +57,14 @@ userSchema.statics.upsertFbUser = function(accessToken, refreshToken, profile, c
     }
   });
 };
+
+userSchema.methods.generateHash = function(password) {
+  return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+}
+
+userSchema.methods.validPassword = function(password) {
+  return bcrypt.compareSync(password, this.password);
+}
 
 const User = mongoose.model('User', userSchema);
 
