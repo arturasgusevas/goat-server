@@ -3,14 +3,14 @@
 //mongoose file must be loaded before all other files in order to provide
 // models to other modules
 const mongoose = require('mongoose');
-// const	passport = require('passport');
+const	passport = require('passport');
 const	express = require('express');
 const	router = express.Router();
 const	cors = require('cors');
 const	bodyParser = require('body-parser');
 
-const routes = require('./routes/routes');
-
+const userRoutes = require('./routes/userRoutes');
+const postRoutes = require('./routes/postRoutes');
 let app = express();
 
 mongoose.connect('mongodb://admin:test123@ds227858.mlab.com:27858/test-db1', {
@@ -31,7 +31,18 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
-app.use('/api', routes);
+// passport.serializeUser(function(user, done) {
+//   done(null, user);
+// });
+
+// passport.deserializeUser(function(user, done) {
+//   done(null, user);
+// });
+
+// app.use(passport.initialize());
+// app.use(passport.session());
+app.use('/api', userRoutes);
+app.use('/posts', postRoutes);
 
 app.listen(3000);
 module.exports = app;
