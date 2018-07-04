@@ -11,6 +11,8 @@ const	bodyParser = require('body-parser');
 
 const userRoutes = require('./routes/userRoutes');
 const postRoutes = require('./routes/postRoutes');
+const commentRoutes = require('./routes/commentRoutes');
+
 let app = express();
 
 mongoose.connect('mongodb://admin:test123@ds227858.mlab.com:27858/test-db1', {
@@ -31,6 +33,7 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
+app.use(express.static('uploads'));
 // passport.serializeUser(function(user, done) {
 //   done(null, user);
 // });
@@ -43,6 +46,7 @@ app.use(bodyParser.json());
 // app.use(passport.session());
 app.use('/api', userRoutes);
 app.use('/posts', postRoutes);
+app.use('/comments', commentRoutes);
 
 app.listen(3000);
 module.exports = app;

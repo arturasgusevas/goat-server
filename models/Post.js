@@ -10,6 +10,9 @@ const postSchema = new mongoose.Schema({
 	user: {
 		type: String,
 		required: true
+	},
+	lastComment: {
+		type: Object
 	}
 })
 

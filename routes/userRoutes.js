@@ -32,6 +32,8 @@ router.route('/auth/emailSignup')
             req.body.password) {
             let userData = {
                 email: req.body.email,
+                fullName: req.body.fullName,
+                photoURL: req.body.photoURL,
                 password: User.generateHash(req.body.password),
             }
             //use schema.create to insert data into the db
