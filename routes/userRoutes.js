@@ -73,15 +73,6 @@ router.route('/auth/login')
             });
     }, userController.generateToken, userController.sendToken);
 
-// router.post('/auth/login', passport.authenticate('local-login'), function(req, res, next) {
-//   console.log(req)
-// });
-
-// router.get('/auth/logout', function(req, res) {
-//   req.logout();
-//   res.send('logged out')
-// })
-
 router.route('/auth/me')
     .get(
         userController.authenticate,

@@ -6,6 +6,7 @@ const jwt = require('express-jwt');
 const fs = require('fs');
 const multer = require('multer');
 const path = require('path');
+const sharp = require('sharp');
 
 const DIR = './uploads';
 let filepath = '';
@@ -26,7 +27,9 @@ router.route('/post')
     .post(
         userController.authenticate,
         upload.single('photo'),
+        resize,
         function(req, res, next) {
+            console.log(req.file)
         const postData = {
             image: req.file.path.replace('uploads', ''),
             description: req.body.description,
@@ -51,5 +54,18 @@ router.route('/post')
 router.get('/test', function(req, res) {
     res.send('ok')
 });
+
+function resize(req, res, next) {
+    sharp(req.file.path)
+        .resize(200, 200)
+        .toFile(`uploads/thumb_${req.file.filename}`,function(err, buf) {
+            console.log(`sharp error: ${err}`);
+            console.log(`sharp buffer: ${buf}`);
+        })
+        // .toFile('thumb_' + req.file.filename, (err, data) => {
+        //     console.log("sharp" + " " +err)
+        //     next();
+        // })
+}
 
 module.exports = router;

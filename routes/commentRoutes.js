@@ -36,4 +36,12 @@ router.post('/post',
         })
     })
 
+router.get('/all/:id',
+    userController.authenticate,
+    function(req, res) {
+        Comment.find({'postID': req.params.id}, function(err, data) {
+            res.send(data)
+        })
+    })
+
 module.exports = router;
