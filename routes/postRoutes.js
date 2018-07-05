@@ -29,27 +29,50 @@ router.route('/post')
         upload.single('photo'),
         resize,
         function(req, res, next) {
-            console.log(req.file)
-        const postData = {
-            image: req.file.path.replace('uploads', ''),
-            description: req.body.description,
-            user: req.body.user
-        };
-        let post = new Post(postData);
-        post.save(function(err, data) {
-            if (err) {
-                res.send(err)
-            } else {
-                res.send(data)
-            }
-            // next();
+            const imagePath = req.file.path.replace('uploads\\', '');
+            const postData = {
+                image: imagePath,
+                thumbnail: res.locals.thumbPath,
+                description: req.body.description,
+                user: req.body.user
+            };
+            let post = new Post(postData);
+            post.save(function(err, data) {
+                if (err) {
+                    res.send(err)
+                } else {
+                    res.send(data)
+                }
+            })
         })
-    })
     .get(userController.authenticate, function(req, res, next) {
         Post.find({}, function(err, data) {
             res.send(data)
         })
     })
+
+
+router.delete('/post:id', 
+        userController.authenticate,
+        function(req, res, next) {
+            Post.findById(req.params.id, function(err, data) {
+                console.log(req.auth.id);
+                console.log(data.user);
+                if (req.auth.id !== data.user) {
+                    res.send({error: 'cannot delete other user\'s post'})
+                } else {
+                    next()
+                }
+            })
+        },
+        function(req, res, next) {
+            Post.deleteOne({'_id': req.params.id}, function(err, data) {
+                if (err) {console.log(err)}
+                    else {
+                        res.send('deleted')
+                    }
+            })
+        })
 
 router.get('/test', function(req, res) {
     res.send('ok')
@@ -58,14 +81,11 @@ router.get('/test', function(req, res) {
 function resize(req, res, next) {
     sharp(req.file.path)
         .resize(200, 200)
-        .toFile(`uploads/thumb_${req.file.filename}`,function(err, buf) {
-            console.log(`sharp error: ${err}`);
-            console.log(`sharp buffer: ${buf}`);
+        .toFile(`uploads/thumb_${req.file.filename}`, function(err, buf) {
+            res.locals.thumbPath = `thumb_${req.file.filename}`;
+            if (err) { console.log(err) }
+            next();
         })
-        // .toFile('thumb_' + req.file.filename, (err, data) => {
-        //     console.log("sharp" + " " +err)
-        //     next();
-        // })
 }
 
 module.exports = router;
