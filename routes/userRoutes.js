@@ -7,11 +7,6 @@ let passportConfig = require('../config/passport');
 const bcrypt = require('bcrypt');
 passportConfig.config();
 
-router.route('/check').get(function(req, res) {
-    res.status(200);
-    res.send('API is working');
-});
-
 router.route('/auth/facebook')
     .post(passport.authenticate('facebook-token', { session: false }), function(req, res, next) {
         if (!req.user) {
@@ -39,7 +34,9 @@ router.route('/auth/emailSignup')
             //use schema.create to insert data into the db
             User.create(userData, function(err, user) {
                 if (err) {
-                    return next(err)
+                    if (err.code === 11000) {
+                        res.json({'error': 'email already in use'});                        
+                    }
                 } else {
                     res.send('signed up');
                 }

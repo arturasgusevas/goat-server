@@ -5,7 +5,7 @@
 const   mongoose = require('mongoose');
 const	passport = require('passport');
 const	express = require('express');
-const	router = express.Router();
+// const	router = express.Router();
 const	cors = require('cors');
 const	bodyParser = require('body-parser');
 
@@ -14,7 +14,6 @@ const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 
 let app = express();
-
 mongoose.connect('mongodb://admin:test123@ds227858.mlab.com:27858/test-db1', {
   	useMongoClient: true
 });
@@ -34,17 +33,11 @@ app.use(bodyParser.urlencoded({
 app.use(bodyParser.json());
 
 app.use(express.static('uploads'));
-// passport.serializeUser(function(user, done) {
-//   done(null, user);
-// });
 
-// passport.deserializeUser(function(user, done) {
-//   done(null, user);
-// });
-
-// app.use(passport.initialize());
-// app.use(passport.session());
-app.use('/api', userRoutes);
+app.use('/check', (req, res) => {
+	res.send('API is working')
+})
+app.use('/users', userRoutes);
 app.use('/posts', postRoutes);
 app.use('/comments', commentRoutes);
 
