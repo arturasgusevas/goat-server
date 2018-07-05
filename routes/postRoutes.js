@@ -52,27 +52,38 @@ router.route('/post')
     })
 
 
-router.delete('/post:id', 
-        userController.authenticate,
-        function(req, res, next) {
-            Post.findById(req.params.id, function(err, data) {
-                console.log(req.auth.id);
-                console.log(data.user);
-                if (req.auth.id !== data.user) {
-                    res.send({error: 'cannot delete other user\'s post'})
-                } else {
-                    next()
-                }
-            })
-        },
-        function(req, res, next) {
-            Post.deleteOne({'_id': req.params.id}, function(err, data) {
-                if (err) {console.log(err)}
-                    else {
-                        res.send('deleted')
+router.delete('/post:id',
+    userController.authenticate,
+    function(req, res, next) {
+        Post.findById(req.params.id, function(err, data) {
+            console.log(req.auth.id);
+            console.log(data.user);
+            if (req.auth.id !== data.user) {
+                res.send({ error: 'cannot delete other user\'s post' })
+            } else {
+                fs.unlink('uploads/'+data.image, err => {
+                    if (err) { console.log(err) } else { 
+                        console.log('deleted image') 
+                        fs.unlink('uploads/'+data.thumbnail, err => {
+                            if (err) { 
+                                console.log(err) 
+                            } else { 
+                                console.log('deleted tumbnail');
+                                next()
+                            }
+                        })
                     }
-            })
+                })
+            }
         })
+    },
+    function(req, res, next) {
+        Post.deleteOne({ '_id': req.params.id }, function(err, data) {
+            if (err) { console.log(err) } else {
+                res.send('deleted')
+            }
+        })
+    })
 
 router.get('/test', function(req, res) {
     res.send('ok')
