@@ -1,42 +1,40 @@
-'use strict';
-
-//mongoose file must be loaded before all other files in order to provide
+// mongoose file must be loaded before all other files in order to provide
 // models to other modules
-const   mongoose = require('mongoose');
-const	passport = require('passport');
-const	express = require('express');
-// const	router = express.Router();
-const	cors = require('cors');
-const	bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 
 const userRoutes = require('./routes/userRoutes');
 const postRoutes = require('./routes/postRoutes');
 const commentRoutes = require('./routes/commentRoutes');
 
-let app = express();
+mongoose.Promise = require('bluebird');
+
+const app = express();
 mongoose.connect('mongodb://admin:test123@ds227858.mlab.com:27858/test-db1', {
-  	useMongoClient: true
+  useMongoClient: true,
 });
 // enable cors
-let corsOption = {
+const corsOption = {
   origin: true,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
-  exposedHeaders: ['x-auth-token']
+  exposedHeaders: ['x-auth-token'],
 };
 app.use(cors(corsOption));
 
-//rest API requirements
+// rest API requirements
 app.use(bodyParser.urlencoded({
-  extended: true
+  extended: true,
 }));
 app.use(bodyParser.json());
 
 app.use(express.static('uploads'));
 
 app.use('/check', (req, res) => {
-	res.send('API is working')
-})
+  res.send('API is working');
+});
 app.use('/users', userRoutes);
 app.use('/posts', postRoutes);
 app.use('/comments', commentRoutes);

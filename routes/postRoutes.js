@@ -1,102 +1,90 @@
 const express = require('express');
+
 const router = express.Router();
-const userController = require('../controllers/user');
-const Post = require('../models/Post');
-const jwt = require('express-jwt');
 const fs = require('fs');
 const multer = require('multer');
 const path = require('path');
-const sharp = require('sharp');
+const Post = require('../models/Post');
+const userController = require('../controllers/user');
+const postController = require('../controllers/post');
+
 
 const DIR = './uploads';
 let filepath = '';
 
-let storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, DIR);
-    },
-    filename: (req, file, cb) => {
-        filepath = file.fieldname + '-' + Date.now() + path.extname(file.originalname);
-        cb(null, filepath);
-    }
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, DIR);
+  },
+  filename: (req, file, cb) => {
+    filepath = `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`;
+    cb(null, filepath);
+  },
 });
-let upload = multer({ storage: storage });
+const upload = multer({ storage });
 
 
 router.route('/post')
-    .post(
-        userController.authenticate,
-        upload.single('photo'),
-        resize,
-        function(req, res, next) {
-            const imagePath = req.file.path.replace('uploads\\', '');
-            const postData = {
-                image: imagePath,
-                thumbnail: res.locals.thumbPath,
-                description: req.body.description,
-                user: req.body.user
-            };
-            let post = new Post(postData);
-            post.save(function(err, data) {
-                if (err) {
-                    res.send(err)
-                } else {
-                    res.send(data)
-                }
-            })
-        })
-    .get(userController.authenticate, function(req, res, next) {
-        Post.find({}, function(err, data) {
-            res.send(data)
-        })
-    })
-
-
-router.delete('/post:id',
+  .post(
     userController.authenticate,
-    function(req, res, next) {
-        Post.findById(req.params.id, function(err, data) {
-            console.log(req.auth.id);
-            console.log(data.user);
-            if (req.auth.id !== data.user) {
-                res.send({ error: 'cannot delete other user\'s post' })
-            } else {
-                fs.unlink('uploads/'+data.image, err => {
-                    if (err) { console.log(err) } else { 
-                        console.log('deleted image') 
-                        fs.unlink('uploads/'+data.thumbnail, err => {
-                            if (err) { 
-                                console.log(err) 
-                            } else { 
-                                console.log('deleted tumbnail');
-                                next()
-                            }
-                        })
-                    }
-                })
-            }
-        })
+    upload.single('photo'),
+    postController.resize,
+    (req, res) => {
+      const imagePath = req.file.path.replace('uploads\\', '');
+      const postData = {
+        image: imagePath,
+        thumbnail: res.locals.thumbPath,
+        description: req.body.description,
+        user: req.body.user,
+      };
+      const post = new Post(postData);
+      post.save((err, data) => {
+        if (err) {
+          res.send(err);
+        } else {
+          res.send(data);
+        }
+      });
     },
-    function(req, res, next) {
-        Post.deleteOne({ '_id': req.params.id }, function(err, data) {
-            if (err) { console.log(err) } else {
-                res.send('deleted')
-            }
-        })
-    })
+  )
+  .get(userController.authenticate, (req, res) => {
+    Post.find({}, (err, data) => {
+      res.send(data);
+    });
+  });
 
-router.get('/test', function(req, res) {
-    res.send('ok')
-});
 
-function resize(req, res, next) {
-    sharp(req.file.path)
-        .resize(200, 200)
-        .toFile(`uploads/thumb_${req.file.filename}`, function(err, buf) {
-            res.locals.thumbPath = `thumb_${req.file.filename}`;
-            if (err) { console.log(err) }
-            next();
-        })
-}
+router.delete('/post/:id',
+  userController.authenticate,
+  (req, res, next) => {
+    Post.findById(req.params.id, (err, data) => {
+      if (req.auth.id !== data.user) {
+        res.send({ error: 'cannot delete other user\'s post' });
+      } else {
+        fs.unlink(`uploads/${data.image}`, (error) => {
+          if (error) {
+            res.json({ error });
+          } else {
+            fs.unlink(`uploads/${data.thumbnail}`, (e) => {
+              if (e) {
+                res.json({ error: e });
+              } else {
+                next();
+              }
+            });
+          }
+        });
+      }
+    });
+  },
+  (req, res) => {
+    Post.deleteOne({ _id: req.params.id }, (err) => {
+      if (err) {
+        res.json({ error: err });
+      } else {
+        res.json({ message: 'post deleted' });
+      }
+    });
+  });
 
 module.exports = router;

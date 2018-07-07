@@ -10,12 +10,16 @@
   "author": "Ivan Vasiljevic",
   "license": "MIT",
   "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^13.0.0",
+    "eslint-plugin-import": "^2.13.0",
     "gulp": "~3.9.1",
     "gulp-eslint": "^2.0.0",
     "gulp-nodemon": "^2.2.1"
   },
   "dependencies": {
     "bcrypt": "^2.0.1",
+    "bluebird": "^3.5.1",
     "body-parser": "^1.17.1",
     "cors": "^2.8.4",
     "express": "^4.15.2",
